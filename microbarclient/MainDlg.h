@@ -4,31 +4,50 @@
 
 #pragma once
 #include "lua.hpp"
+#include <atlstr.h>
 #define WB_MOD (MOD_CONTROL|MOD_SHIFT)
-
+HWND g_hLastWnd=0;
+CString g_sLastTitle;
+int restore_text(lua_State*L)
+{
+	if (IsWindow(g_hLastWnd))
+		SetWindowText(g_hLastWnd,g_sLastTitle);
+	return 0;
+}
 int show_text(lua_State*L)
 {
 	int n = lua_gettop(L);  /* number of arguments */
-	int i = 1;
+
 	lua_getglobal(L, "tostring");
 
 	const char *s;
 	lua_pushvalue(L, -1);  /* function to be called */
-	lua_pushvalue(L, i);   /* value to print */
+	lua_pushvalue(L, 1);   /* value to print */
 	lua_pcall(L, 1, 1, 0);
 	s = lua_tostring(L, -1);  /* get result */
 	if (s == NULL)
 		return 0;
 
-	fputs(s, stdout);
+	//fputs(s, stdout);
 	lua_pop(L, 1);  /* pop result */
 
 	HWND hTop=GetForegroundWindow();
 	if (IsWindow(hTop))
 	{
 		TCHAR wstr[1500];
-
-		MultiByteToWideChar(CP_UTF8, 0, s, -1,  wstr, 150);
+		GetWindowText(hTop,wstr,1500);
+		
+		if (g_hLastWnd!=hTop)
+		{
+			if (IsWindow(g_hLastWnd))
+			{
+				SetWindowText(g_hLastWnd,g_sLastTitle);
+			}
+			g_sLastTitle = wstr;
+			g_hLastWnd=hTop;
+		}
+		MultiByteToWideChar(CP_UTF8, 0, s, -1,  wstr, 1500);
+		
 		SetWindowText(hTop,wstr);
 	}
 	lua_pushinteger(L,LUA_INTEGER(hTop) );
@@ -105,6 +124,9 @@ public:
 		lua_register (L,
 			"show_text",
 			show_text);
+		lua_register (L,
+			"restore_text",
+			restore_text);
 		if (luaL_loadfile(L,"funcs.lua")==0)
 		{
 			lua_pcall(L,0,0,0);
@@ -259,24 +281,35 @@ public:
 				if (SUCCEEDED(hr))
 				{
 					//strUrl = COLE2T(bstrUrl);
-				//	pElemt->get_innerHTML();
+					BSTR strHtml;
+					pElemt->get_innerHTML(&strHtml);
+					TCHAR*pStartToken = _T("<SPAN id=user-access-token>");
+
+					TCHAR*pEndToken = _T("</SPAN>");
+					TCHAR *pStart = wcsstr(strHtml,pStartToken);
+					if (!pStart)
+					{
+						return;
+					}
+					pStart+=wcslen(pStartToken);
+					TCHAR *pEnd = wcsstr(pStart,pEndToken);
+					memset(token,0,1024);
+					WideCharToMultiByte(CP_UTF8,0,pStart,(pEnd-pStart)/*/sizeof(*pStart)*/,token,1024,NULL,NULL);
+					//MessageBox(strHtml);
+					char assign[2048];
+					sprintf(assign,
+						"token = '%s' \
+						s=weiboapiget('statuses/home_timeline',token,'page='..1) \
+						tl = json.decode(s)['statuses']",
+						token);
+					luaL_dostring(L,assign);
 
 				}
 
-#ifdef _DEBUG
-				CComPtr<IHTMLLocation> spLocation;
-				hr = spHTMLDoc->get_location(&spLocation);
-				if (SUCCEEDED(hr))
-				{
-					CComBSTR bstrHref;
-					hr = spLocation->get_href(&bstrHref);
-					//CString strHref = COLE2T(bstrHref);
-					//FLTRACE(TEXT("FLMonitor::Get WebBrowser: IHTMLLocation::href=%s, HWND:%08X\r\n"), strHref, hWndBrowser);
-				}
-#endif
+
 			}
 		}
-		strcpy(token,"2.00lyA8HB0J6NEw9197666ad20IG7bl");
+		//strcpy(token,"2.00lyA8HB0J6NEw9197666ad20IG7bl");
 	}
 
 };
