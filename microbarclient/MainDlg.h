@@ -152,23 +152,22 @@ public:
 		}
 		keyid=2012;
 		RegisterHotKey(this->m_hWnd,keyid,WB_MOD,VK_DOWN);
-		keyid++;
+		keyid++;//13
 		RegisterHotKey(this->m_hWnd,keyid,WB_MOD,VK_UP);
-		keyid++;
+		keyid++;//14
 		RegisterHotKey(this->m_hWnd,keyid,WB_MOD,'R');
-		keyid++;
+		keyid++;//15
 		RegisterHotKey(this->m_hWnd,keyid,WB_MOD,'Z');
-		keyid++;
+		keyid++;//16
 		RegisterHotKey(this->m_hWnd,keyid,WB_MOD,'C');
-		keyid++;
+		keyid++;//17
 		RegisterHotKey(this->m_hWnd,keyid,WB_MOD,VK_RIGHT);
-		keyid++;
+		keyid++;//18
 		RegisterHotKey(this->m_hWnd,keyid,WB_MOD,VK_LEFT);
-		keyid++;
-		RegisterHotKey(this->m_hWnd,keyid,WB_MOD,VK_DOWN);
-		keyid++;
+		keyid++;//19
+		
 		RegisterHotKey(this->m_hWnd,keyid,WB_MOD,'O');
-		keyid++;
+		keyid++;//20
 		RegisterHotKey(this->m_hWnd,keyid,WB_MOD,'F');
 		return TRUE;
 	}
@@ -303,13 +302,13 @@ public:
 						tl = json.decode(s)['statuses']",
 						token);
 					luaL_dostring(L,assign);
-
+					wndIE.ShowWindow(SW_HIDE);
 				}
 
 
 			}
 		}
-		//strcpy(token,"2.00lyA8HB0J6NEw9197666ad20IG7bl");
+		
 	}
 
 };

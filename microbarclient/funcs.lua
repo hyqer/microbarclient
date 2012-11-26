@@ -2,8 +2,8 @@ require( "luacurl" )
 require("json")
 domain='api.weibo.com'
 version='2'
-dofile('table.lua')
-token = "2.00lyA8HB0J6NEw9197666ad20IG7bl"
+--dofile('table.lua')
+token = ""
  c = curl.new() -- curl.new not found
 function weiboapiget( apiname,token,param )
     if not param then
@@ -44,8 +44,24 @@ function weiboapiget( apiname,token,param )
     --table.concat(table_of_strings, separator)
     return table.concat(t,"")
 end
+function getTLName()
+    return tl[index]['user']['screen_name']
+end
 
+function getTLText()
+    local txt = tl[index]['text']
+    if tl[index]['retweeted_status'] then
+        txt = txt..'|转|'..tl[index]['retweeted_status']['user']['screen_name']..' : '..tl[index]['retweeted_status']['text']
+    end
+    return txt
+end
+function openUrl(  )
+    local mid = tl[index]['mid']
+end
 function OnHotKey(keyid)
+    if not tl and type(tl) ~='table' then
+        return
+    end
     if keyid == 2012 then
         if(index+1 <= #tl) then
             index = index+1
@@ -63,7 +79,7 @@ function OnHotKey(keyid)
             end
         end
 		pos = 1
-		show_text(tl[index]['user']['screen_name']..":".. tl[index]['text'])
+		show_text(getTLName().." : ".. getTLText())
         
     elseif keyid == 2013 then
         if(index>1)then
@@ -71,29 +87,30 @@ function OnHotKey(keyid)
 		else
 			return
         end
-		pos = 0
-		show_text(tl[index]['user']['screen_name']..":".. tl[index]['text'])
+		pos = 1
+		show_text(getTLName().." : ".. getTLText())
     elseif keyid == 2014 then
     	tl = json.decode(weiboapiget('statuses/home_timeline',token,'page='..page))['statuses']
 		index=1
 		pos = 1
 		page = 1
-		show_text(tl[index]['user']['screen_name']..":".. tl[index]['text'])
+		show_text(getTLName().." : ".. getTLText())
     elseif keyid == 2015 then
         restore_text()
     elseif keyid == 2016 then
         restore_text()
     elseif keyid == 2017 then
-        if (pos+1)<#(tl[index]['text']) then
+        if (pos+1)<u8charcount(getTLText()) then
             pos = pos + 1
-            show_text(tl[index]['user']['screen_name']..":".. u8sub(tl[index]['text'],index))
+            show_text(getTLName().." : ".. u8sub(getTLText(),pos))
         end
     elseif keyid == 2018 then
         if(pos>1)then
             pos = pos - 1
-            show_text(tl[index]['user']['screen_name']..":".. u8sub(tl[index]['text'],index))
+            show_text(getTLName().." : ".. u8sub(getTLText(),pos))
         end
     elseif keyid == 2019 then
+        openUrl()
     elseif keyid == 2020 then
     elseif keyid == 2021 then
     elseif keyid == 2022 then
@@ -102,11 +119,11 @@ end
 --os.execute ("start http://www.weibo.com")
 --return show_text("1234qwer")
 
-s=weiboapiget('statuses/home_timeline',token,'page='..1)
+--s=weiboapiget('statuses/home_timeline',token,'page='..1)
 --print("s:"..string.sub(s,1,100))
 --s2=weiboapiget('statuses/home_timeline',token,'page='..2)
 --print("s2:"..string.sub(s2,1,100))
-tl = json.decode(s)['statuses']
+--tl = json.decode(s)['statuses']
 --print(TableToStr(timeline))
 
 index=1
@@ -118,6 +135,8 @@ pos = 1
 
 
 function u8sub(s,pos)
+    --return string.sub(s,pos)
+
     local n = 1
     for i = 1,#s,1 do
         if string.byte(s,n) <128 --10000000 1 byte char
@@ -125,7 +144,7 @@ function u8sub(s,pos)
             n=n+1
             pos = pos -1
         elseif string.byte(s,n) >= 192  --11000000
-            and string.byte(s) <= 223 --11011111 2 bytes char
+            and string.byte(s,n) <= 223 --11011111 2 bytes char
             then
             n = n+2
             pos = pos -1
@@ -139,19 +158,50 @@ function u8sub(s,pos)
             then
             n = n+3
             pos = pos -1
-
+        else
+            n=n+1
         end
         
-        n=i
+        
         if pos <= 0 then 
             break
         end
     end
-    --print(n,pos,s)
-    return string.sub(s,n)
+    print(n,pos,s)
+    return string.sub(s,n-2)
 end
+function  u8charcount( s )
+    --return #s
+    local n = 0
+    if #s <=1 then
+        return #s
+    end
+    for i = 1,#s,1 do
+        if string.byte(s,i) <128 --10000000 1 byte char
+            then
+            n=n+1
 
-s= "我的地盘我做主1234343"
-for i=1,10,1 do
-    print (u8sub(s,i))
+        elseif string.byte(s,i) >= 192  --11000000
+            and string.byte(s,i) <= 223 --11011111 2 bytes char
+            then
+            n = n+1
+
+        elseif  string.byte(s,i) >= 224  --11100000
+            and string.byte(s,i) <= 239 --11101111 3 bytes char
+            then
+            n = n+1
+
+        elseif  string.byte(s,i) >= 240  --11110000
+            and string.byte(s,i) <= 247 --11110111 4 bytes char
+            then
+            n = n+1
+        end
+    end
+    return n
 end
+--s= "我的地盘我做主1234343"
+
+--print (u8charcount(s))
+--for k = 1, u8charcount(s),1 do
+--print(k,u8sub(s,1))
+--end

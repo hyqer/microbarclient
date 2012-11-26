@@ -3,6 +3,8 @@ Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual Studio 2010
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "microbarclient", "microbarclient\microbarclient.vcxproj", "{A407E395-096E-48F9-BF49-D2DFD9CAEDC8}"
 EndProject
+Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "wbsSetup", "wbsSetup\wbsSetup.vdproj", "{64CA2BCB-6CD8-4191-97B8-FE4062538A05}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -13,6 +15,8 @@ Global
 		{A407E395-096E-48F9-BF49-D2DFD9CAEDC8}.Debug|Win32.Build.0 = Debug|Win32
 		{A407E395-096E-48F9-BF49-D2DFD9CAEDC8}.Release|Win32.ActiveCfg = Release|Win32
 		{A407E395-096E-48F9-BF49-D2DFD9CAEDC8}.Release|Win32.Build.0 = Release|Win32
+		{64CA2BCB-6CD8-4191-97B8-FE4062538A05}.Debug|Win32.ActiveCfg = Debug
+		{64CA2BCB-6CD8-4191-97B8-FE4062538A05}.Release|Win32.ActiveCfg = Release
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
