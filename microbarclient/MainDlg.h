@@ -81,6 +81,7 @@ public:
 		COMMAND_ID_HANDLER(IDOK, OnOK)
 		COMMAND_ID_HANDLER(IDCANCEL, OnCancel)
 		MESSAGE_HANDLER (WM_HOTKEY, OnHotkeyDown) 
+		MESSAGE_HANDLER(WM_SHOWWINDOW, OnShowWindow)
 	END_MSG_MAP()
 
 // Handler prototypes (uncomment arguments if needed):
@@ -107,68 +108,7 @@ public:
 
 		UIAddChildWindowContainer(m_hWnd);
 
-		CAxWindow wndIE = GetDlgItem(IDC_EXPLORER1);
-		CComPtr<IWebBrowser2> pWB2;
-		HRESULT hr;
-
-		hr = wndIE.QueryControl ( &pWB2 );
-		if ( pWB2 )
-		{
-			CComVariant v;  // empty variant
-
-			pWB2->Navigate ( CComBSTR("http://microbar.rmbback.com/login/weibo/"), 
-				&v, &v, &v, &v );
-		}
-		L = luaL_newstate();
-		luaL_openlibs(L);
-		lua_register (L,
-			"show_text",
-			show_text);
-		lua_register (L,
-			"restore_text",
-			restore_text);
-		if (luaL_loadfile(L,"funcs.lua")==0)
-		{
-			lua_pcall(L,0,0,0);
-			//const char* str = lua_tostring(L,-1);
-		/*	lua_pop(L,1);
-			if (str)
-			{
-				TCHAR wstr[150];
-
-				MultiByteToWideChar(CP_UTF8, 0, str, -1,  wstr, 150);
-				this->SetWindowText(wstr);
-			}*/
-
-		}
-		else
-		{
-			const char* error = lua_tostring(L,-1);
-			lua_pop(L,1);
-			if (error)
-			{
-				MessageBox(CComBSTR(error));
-			}
-		}
-		keyid=2012;
-		RegisterHotKey(this->m_hWnd,keyid,WB_MOD,VK_DOWN);
-		keyid++;//13
-		RegisterHotKey(this->m_hWnd,keyid,WB_MOD,VK_UP);
-		keyid++;//14
-		RegisterHotKey(this->m_hWnd,keyid,WB_MOD,'R');
-		keyid++;//15
-		RegisterHotKey(this->m_hWnd,keyid,WB_MOD,'Z');
-		keyid++;//16
-		RegisterHotKey(this->m_hWnd,keyid,WB_MOD,'C');
-		keyid++;//17
-		RegisterHotKey(this->m_hWnd,keyid,WB_MOD,VK_RIGHT);
-		keyid++;//18
-		RegisterHotKey(this->m_hWnd,keyid,WB_MOD,VK_LEFT);
-		keyid++;//19
-		
-		RegisterHotKey(this->m_hWnd,keyid,WB_MOD,'O');
-		keyid++;//20
-		RegisterHotKey(this->m_hWnd,keyid,WB_MOD,'F');
+	
 		return TRUE;
 	}
 
@@ -302,7 +242,7 @@ public:
 						tl = json.decode(s)['statuses']",
 						token);
 					luaL_dostring(L,assign);
-					wndIE.ShowWindow(SW_HIDE);
+					//wndIE.ShowWindow(SW_HIDE);
 				}
 
 
@@ -311,4 +251,69 @@ public:
 		
 	}
 
+	//LRESULT OnShowWindow(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& /*bHandled*/);
+	LRESULT OnShowWindow(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& /*bHandled*/)
+	{
+		// TODO: 在此添加消息处理程序代码和/或调用默认值
+		static bool init=false;
+		if (!init)
+		{
+			init = true;
+			CAxWindow wndIE = GetDlgItem(IDC_EXPLORER1);
+			CComPtr<IWebBrowser2> pWB2;
+			HRESULT hr;
+
+			hr = wndIE.QueryControl ( &pWB2 );
+			if ( pWB2 )
+			{
+				CComVariant v;  // empty variant
+
+				pWB2->Navigate ( CComBSTR("http://microbar.rmbback.com/"), 
+					&v, &v, &v, &v );
+			}
+			L = luaL_newstate();
+			luaL_openlibs(L);
+			lua_register (L,
+				"show_text",
+				show_text);
+			lua_register (L,
+				"restore_text",
+				restore_text);
+			if (luaL_loadfile(L,"funcs.lua")==0)
+			{
+				lua_pcall(L,0,0,0);
+			}
+			else
+			{
+				const char* error = lua_tostring(L,-1);
+				lua_pop(L,1);
+				if (error)
+				{
+					MessageBox(CComBSTR(error));
+				}
+			}
+			keyid=2012;
+			RegisterHotKey(this->m_hWnd,keyid,WB_MOD,VK_DOWN);
+			keyid++;//13
+			RegisterHotKey(this->m_hWnd,keyid,WB_MOD,VK_UP);
+			keyid++;//14
+			RegisterHotKey(this->m_hWnd,keyid,WB_MOD,'R');
+			keyid++;//15
+			RegisterHotKey(this->m_hWnd,keyid,WB_MOD,'Z');
+			keyid++;//16
+			RegisterHotKey(this->m_hWnd,keyid,WB_MOD,'C');
+			keyid++;//17
+			RegisterHotKey(this->m_hWnd,keyid,WB_MOD,VK_RIGHT);
+			keyid++;//18
+			RegisterHotKey(this->m_hWnd,keyid,WB_MOD,VK_LEFT);
+			keyid++;//19
+		
+			RegisterHotKey(this->m_hWnd,keyid,WB_MOD,'O');
+			keyid++;//20
+			RegisterHotKey(this->m_hWnd,keyid,WB_MOD,'F');
+			keyid++;//20
+			RegisterHotKey(this->m_hWnd,keyid,WB_MOD,'H');
+		}
+		return 0;
+	}
 };

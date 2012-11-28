@@ -110,7 +110,9 @@ function OnHotKey(keyid)
             show_text(getTLName().." : ".. u8sub(getTLText(),pos))
         end
     elseif keyid == 2019 then
-        openUrl()
+        local uid = tl[index]['user']['id']
+        local mid = tl[index]['mid']
+        os.execute ("start http://microbar.rmbback.com/wb?uid="..uid.."^&mid="..mid)
     elseif keyid == 2020 then
     elseif keyid == 2021 then
     elseif keyid == 2022 then
